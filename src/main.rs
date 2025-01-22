@@ -1,4 +1,5 @@
 use clap::{Arg, ArgAction, Command};
+use std::{io, path::Path};
 
 fn main() {
     // it'll be so it be like it be so yeah it be like yeah itll be yeah so basically yeah itll be
@@ -36,7 +37,6 @@ fn main() {
     let filename_arg = Arg::new("filename")
         .required(true);
 
-
     let ocrypt = Command::new("Ocrypt")
         .version("0.1")
         .author("swag")
@@ -47,5 +47,29 @@ fn main() {
         .arg(filename_arg)
         .get_matches();
 
+    // validate if file exists
+    let file_name = ocrypt.get_one::<String>("filename").unwrap();
+    if !Path::new(file_name).exists() {
+        panic!("Specified file does not exist in this program's opinion.");
+    }
 
+    // if key specified, set, otherwise prompt
+    let key: String = if let Some(in_key) = ocrypt.get_one::<String>("key") {
+        in_key.to_string()
+    } else {
+        println!("Enter the key to use: ");
+        let mut in_key = String::new();
+        io::stdin()
+            .read_line(&mut in_key)
+            .expect("Failed to read line");
+        in_key.trim().to_string()
+    };
+
+    let encrypt = ocrypt.get_one::<bool>("encrypt").copied().unwrap_or(false);
+
+    if encrypt {
+        println!("Encrypting {file_name} with key {key}");
+    } else {
+        println!("Decrypting {file_name} with key {key}");
+    }
 }
