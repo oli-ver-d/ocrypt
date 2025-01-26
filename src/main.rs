@@ -1,5 +1,6 @@
 use clap::{Arg, ArgAction, Command};
 use std::{io, path::Path};
+use ocrypt::*;
 
 fn main() {
     // it'll be so it be like it be so yeah it be like yeah itll be yeah so basically yeah itll be
@@ -69,6 +70,11 @@ fn main() {
 
     if encrypt {
         println!("Encrypting {file_name} with key {key}");
+        let key: [u8; 32] = string_to_fixed_array(&key).expect("Key is not long enough, must be at least 256 bits");         
+        match encrypt_file(file_name, &key) {
+            Ok(_) => println!("Successfully written to {file_name}.ocrypt"),
+            Err(e) => println!("Failed to encrypt, error: {e}")
+        };
     } else {
         println!("Decrypting {file_name} with key {key}");
     }

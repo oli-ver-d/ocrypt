@@ -161,7 +161,7 @@ fn add_round_key(state: &mut [u8; 16], round_key: &[u8]) {
     }
 }
 
-fn encrypt_block(key: &[u8; 32], block: &mut [u8; 16]) {
+pub fn encrypt_block(key: &[u8; 32], block: &mut [u8; 16]) {
     let mut expanded_key = [0u8; 240];
     key_expansion(key, &mut expanded_key);
 
@@ -177,22 +177,29 @@ fn encrypt_block(key: &[u8; 32], block: &mut [u8; 16]) {
     add_round_key(block, &expanded_key[224..240]);
 }
 
-fn pad(data: &mut Vec<u8>, block_size: usize) {
-    let padding_len = block_size - (data.len() % block_size);
-    data.extend(vec![padding_len as u8; padding_len]);
-}
+//fn pad(data: &mut Vec<u8>, block_size: usize) {
+//    let padding_len = block_size - (data.len() % block_size);
+//    data.extend(vec![padding_len as u8; padding_len]);
+//}
 
-pub fn encrypt(key: &[u8; 32], data: &mut [u8]) {
-    let block_size = 16;
-    let mut temp_block = [0u8; 16];
-
-    for block in data.chunks_exact_mut(16) {
-        encrypt_block(key, block.try_into().expect("Somehow array is not 16 long wtf"));
-    }
-    
-    todo!();
-
-}
+//pub fn encrypt(key: &[u8; 32], data: &mut [u8]) {
+//    let block_size = 16;
+//    let mut temp_block = [0u8; 16];
+//
+//    // pad this shit whats gonna happen is we find the needed size and make a new array of the
+//    // exact size.
+//
+//    if data.len() % block_size != 0 {
+//
+//    }
+//
+//    for block in data.chunks_exact_mut(block_size) {
+//        encrypt_block(key, block.try_into().expect("Somehow array is not 16 long wtf"));
+//    }
+//
+//    todo!();
+//
+//}
 
 #[cfg(test)]
 mod tests {

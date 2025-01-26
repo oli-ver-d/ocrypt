@@ -1,2 +1,2 @@
-mod encrypt;
+pub mod encrypt;
 mod decrypt;
