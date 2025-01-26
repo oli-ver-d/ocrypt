@@ -155,7 +155,42 @@ fn sub_word(word: &mut [u8; 4]) {
     }
 }
 
-fn add_round_key(state: &mut [u8; 16], round_key: &[u8; 16]) {
+fn add_round_key(state: &mut [u8; 16], round_key: &[u8]) {
+    for i in 0..16 {
+        state[i] ^= round_key[i];
+    }
+}
+
+fn encrypt_block(key: &[u8; 32], block: &mut [u8; 16]) {
+    let mut expanded_key = [0u8; 240];
+    key_expansion(key, &mut expanded_key);
+
+    add_round_key(block, &expanded_key[0..16]);
+    for i in 1..14 {
+        sub_bytes(block);
+        shift_rows(block);
+        mix_columns(block);
+        add_round_key(block, &expanded_key[i * 16..(i + 1) * 16]);
+    }
+    sub_bytes(block);
+    shift_rows(block);
+    add_round_key(block, &expanded_key[224..240]);
+}
+
+fn pad(data: &mut Vec<u8>, block_size: usize) {
+    let padding_len = block_size - (data.len() % block_size);
+    data.extend(vec![padding_len as u8; padding_len]);
+}
+
+pub fn encrypt(key: &[u8; 32], data: &mut [u8]) {
+    let block_size = 16;
+    let mut temp_block = [0u8; 16];
+
+    for block in data.chunks_exact_mut(16) {
+        encrypt_block(key, block.try_into().expect("Somehow array is not 16 long wtf"));
+    }
+    
+    todo!();
 
 }
 
@@ -213,5 +248,30 @@ mod tests {
             println!(); 
         }
         
+    }
+
+    #[test]
+    fn test_add_round_key() {
+        let mut test_values: [u8; 16] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        let round_key: [u8; 16] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        add_round_key(&mut test_values, &round_key);
+        let expected_values: [u8; 16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];        
+        assert_eq!(test_values, expected_values);
+    }
+
+    #[test]
+    fn test_encrypt_block() {
+        let key: [u8; 32] = [
+            0x60, 0x3d, 0xeb, 0x10, 0x15, 0xca, 0x71, 0xbe, 
+            0x2b, 0x73, 0xae, 0xf0, 0x85, 0x7d, 0x77, 0x81,
+            0x1f, 0x35, 0x2c, 0x07, 0x3b, 0x61, 0x08, 0xd7, 
+            0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4,
+        ];
+
+        let mut block: [u8; 16] = [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+        ];
+
+        encrypt_block(&key, &mut block);
     }
 }
