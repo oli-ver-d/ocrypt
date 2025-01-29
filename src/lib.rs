@@ -13,7 +13,6 @@ pub fn encrypt_file(file_name: &str, key: &[u8; 32]) -> Result<()> {
     let mut buffer = [0u8; 16];
 
     while let Ok(bytes_read) = input_file.read(&mut buffer) {
-        println!("{bytes_read}");
         if bytes_read == 0 {
             break;
         }

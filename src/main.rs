@@ -67,15 +67,15 @@ fn main() {
     };
 
     let encrypt = ocrypt.get_one::<bool>("encrypt").copied().unwrap_or(false);
+    let key: [u8; 32] = string_to_fixed_array(&key).expect("Key is not long enough, must be at least 256 bits");         
 
     if encrypt {
-        println!("Encrypting {file_name} with key {key}");
-        let key: [u8; 32] = string_to_fixed_array(&key).expect("Key is not long enough, must be at least 256 bits");         
+        println!("Encrypting {file_name}");
         match encrypt_file(file_name, &key) {
             Ok(_) => println!("Successfully written to {file_name}.ocrypt"),
             Err(e) => println!("Failed to encrypt, error: {e}")
         };
     } else {
-        println!("Decrypting {file_name} with key {key}");
+        println!("Decrypting {file_name}");
     }
 }
